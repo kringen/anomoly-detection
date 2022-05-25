@@ -5,6 +5,8 @@ import os
 import logging
 import yaml
 import redis
+import json
+import datetime
 
 logging.basicConfig(stream=sys.stdout, format='%(asctime)s %(levelname)-7s ' +
             '%(threadName)-15s %(message)s', level=logging.INFO)
@@ -19,25 +21,25 @@ with open(config_file, "r") as configfile:
 
 def generateCallback(q):
     def callback(ch, method, properties, body):
-        logging.info("received:{}, {}".format(queue,body))
-        key = "readings:ethos:{}".format(q)
-        r.rpush(key,body)
-
+        logging.debug("received:{}, {}".format(q,body))
+        stream = "readings:ethos:{}".format(q)
+        r.xadd(stream, json.loads(body))
+        # This will push to a stream named readings:ethos:<sensor>
+        # To read from this stream:
+        # XREAD STREAMS readings:ethos:NODE3000011 0-0
     return callback
-#def callback(ch, method, properties, body):
-#    logging.info("received:{}, {}, {}, {}".format(ch, method, properties,body))
-#    key = "database:table:{}".format("test")
-#    r.rpush(key,body)
+
 
 def consume():
     channel = rabbitmq_connection.channel()
 
+    # For each queue in config file, create a consumer and wait for messages
     for q in config["rabbitmq"]["queues"]:
         channel.queue_declare(queue=q)
         callback = generateCallback(q)
         channel.basic_consume(queue=q, on_message_callback=callback, auto_ack=True)
 
-    print(' [*] Waiting for messages. To exit press CTRL+C')
+    logging.info("Starting to consume messages...")
     channel.start_consuming()
 
 def cleanup():

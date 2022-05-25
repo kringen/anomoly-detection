@@ -8,12 +8,21 @@ import pika
 import atexit
 import time
 import datetime
+import json
 
 logging.basicConfig(stream=sys.stdout, format='%(asctime)s %(levelname)-7s ' +
             '%(threadName)-15s %(message)s', level=logging.INFO)
 cwd = os.path.dirname(__file__)
 config_file = os.path.join(cwd,"config.yaml")
 
+def cleanup():
+    # Close rabbitmq connection
+    logging.info("Closing connection to rabbitmq.")
+    tr.rabbitmq_connection.close()
+    # Unsubscribing from Lightstreamer by using the subscription key
+    lightstreamer_client.unsubscribe(sub_key)
+    # Disconnecting
+    lightstreamer_client.disconnect()
 
 class TelemetryReceiver:
     def __init__(self):
@@ -28,31 +37,24 @@ class TelemetryReceiver:
         self.rabbitmq_channel = self.rabbitmq_connection.channel()
         # Loop through the rabbitmq.queues and declare a queue
         for q in self.config["rabbitmq"]["queues"]:
+            logging.info("Creating queue for {}".format(q))
             self.rabbitmq_channel.queue_declare(queue=q)
 
     def receive_reading(self, reading):
         # Reading should be in this format:
         # {'pos': 1, 'name': 'NODE3000011', 'values': {'Value': '6.0327787399292'}}
-        print(reading)
         queue = reading["name"]
-        reading_value = reading["values"]["Value"]
+        reading_value = {}
+        reading_value["timestamp"] = reading["values"]["TimeStamp"]
+        reading_value["value"] = reading["values"]["Value"]
         logging.debug("Queue: {}, Value: {}".format(queue, reading_value))
         # Publish to the queue
         self.rabbitmq_channel.basic_publish(exchange='',
                       routing_key=queue,
-                      body=reading_value)
+                      body=json.dumps(reading_value))
 
 if __name__ == "__main__":
     tr = TelemetryReceiver()
-
-    def cleanup():
-        # Close rabbitmq connection
-        logging.info("Closing connection to rabbitmq.")
-        tr.rabbitmq_connection.close()
-        # Unsubscribing from Lightstreamer by using the subscription key
-        lightstreamer_client.unsubscribe(sub_key)
-        # Disconnecting
-        lightstreamer_client.disconnect()
 
     atexit.register(cleanup)
 
@@ -72,13 +74,12 @@ if __name__ == "__main__":
     subscription = ls.Subscription(
         mode="MERGE",
         items=config["rabbitmq"]["queues"],
-        fields=["Value","TimeStamp","Status","Symbol"])
+        fields=["Value","TimeStamp"])
         #fields=["Value"])
 
 
     # A simple function acting as a Subscription listener
     def on_item_update(item_update):
-        #print(item_update)
         tr.receive_reading(item_update)
         tr.last_received = datetime.datetime.now().isoformat()
         tr.readings_received += 1

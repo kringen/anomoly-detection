@@ -1,0 +1,61 @@
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: ${APPLICATION_NAME}
+  iconClass: icon-redis
+objects:
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      annotations:
+        description: Exposes and load balances the application pods
+      labels:
+        template: ${APPLICATION_NAME}
+      name: ${APPLICATION_NAME}
+    spec:
+      ports:
+      - name: ${APPLICATION_NAME}-port
+        port: ${{PORT}}
+        targetPort: ${{PORT}}
+      selector:
+        name: ${APPLICATION_NAME}
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      name: ${APPLICATION_NAME}
+    spec:
+      replicas: ${{REPLICA_COUNT}}
+      selector:
+        matchLabels:
+          app: ${APPLICATION_NAME}
+      template:
+        metadata:
+          labels:
+            app: ${APPLICATION_NAME}
+        spec:
+          containers:
+          - name: ${APPLICATION_NAME}
+            image: ${SOURCE_IMAGE_NAME}
+            ports:
+            - containerPort: ${{PORT}}
+parameters:
+  - name: APPLICATION_NAME
+    displayName: Application Name
+    description: The name of the application - used for resource names and labels
+    value: redis-server
+    required: true
+  - name: REPLICA_COUNT
+    description: Number of replicas to run
+    value: "1"
+    required: true
+  - name: PORT
+    description: Port on which the application listens.
+    value: "6379"
+    required: false
+  - name: SOURCE_IMAGE_NAME
+    description: Name of the source/base image.
+    value: redis:latest
+    required: false
+  - name: RESOURCE_LIMIT_MEMORY
+    description: "Limit the memory consumed by a pod before it is destroyed and re-created."
+    value: 1Gi
