@@ -17,7 +17,7 @@ objects:
       source:
         git:
           uri: "${SOURCE_REPOSITORY_URL}"
-          ref: "${BRANCH}"
+          ref: ${BRANCH}
         contextDir: "${CONTEXT_DIRECTORY}"
       strategy:
         type: Docker                      
