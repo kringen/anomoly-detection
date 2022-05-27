@@ -19,11 +19,14 @@ objects:
           uri: "${SOURCE_REPOSITORY_URL}"
           ref: "${BRANCH}"
         contextDir: "${CONTEXT_DIRECTORY}"
-        dockerfile: Dockerfile
+      strategy:
+        type: Docker                      
+        dockerStrategy:
+          dockerfilePath: Dockerfile    # Look for Dockerfile in: gitUri/contextDir/dockerfilePath
       output:
         to:
           kind: DockerImage
-          name: ${APPLICATION_NAME}:latest
+          name: ${IMAGE_REPOSITORY}/${APPLICATION_NAME}:latest
         pushSecret:
           name: dockerhub
 parameters:
@@ -37,27 +40,20 @@ parameters:
     description: The URL for the application git repository
     value: https://github.com/kringen/anomoly-detection
     required: true
+  - name: BRANCH
+    displayName: git branch
+    value: main
+    required: false
   - name: CONTEXT_DIRECTORY
     displayName: Context Directory
     description: Directory containing application in source repository.
     value: /app/telemetry_receiver
     required: false
+  - name: IMAGE_REPOSITORY
+    displayName: Image Repository
+    value: kringen
+    required: false
   - name: REPLICA_COUNT
     description: Number of replicas to run
     value: "1"
     required: true
-  - name: PORT
-    description: Port on which the application listens.
-    value: "8080"
-    required: false
-  - name: SOURCE_IMAGE_NAME
-    description: Name of the source/base image.
-    value: nodejs:14-ubi7
-    required: false
-  - name: SOURCE_IMAGE_NAMESPACE
-    description: "namespace where the source/base image resides."
-    value: openshift
-    required: false
-  - name: RESOURCE_LIMIT_MEMORY
-    description: "Limit the memory consumed by a pod before it is destroyed and re-created."
-    value: 512Mi
