@@ -43,16 +43,16 @@ parameters:
   - name: BRANCH
     displayName: git branch
     value: main
-    required: false
+    required: true
   - name: CONTEXT_DIRECTORY
     displayName: Context Directory
     description: Directory containing application in source repository.
     value: /app/telemetry_receiver
-    required: false
+    required: true
   - name: IMAGE_REPOSITORY
     displayName: Image Repository
     value: kringen
-    required: false
+    required: true
   - name: REPLICA_COUNT
     description: Number of replicas to run
     value: "1"
