@@ -18,7 +18,7 @@ objects:
         port: ${{PORT}}
         targetPort: ${{PORT}}
       selector:
-        name: ${APPLICATION_NAME}
+        app: ${APPLICATION_NAME}
   - kind: Deployment
     apiVersion: apps/v1
     metadata:

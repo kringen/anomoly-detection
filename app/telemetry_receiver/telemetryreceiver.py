@@ -47,7 +47,7 @@ class TelemetryReceiver:
         reading_value = {}
         reading_value["timestamp"] = reading["values"]["TimeStamp"]
         reading_value["value"] = reading["values"]["Value"]
-        logging.debug("Queue: {}, Value: {}".format(queue, reading_value))
+        logging.info("Queue: {}, Value: {}".format(queue, reading_value))
         # Publish to the queue
         self.rabbitmq_channel.basic_publish(exchange='',
                       routing_key=queue,

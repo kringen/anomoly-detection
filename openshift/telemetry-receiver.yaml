@@ -27,7 +27,39 @@ objects:
           kind: DockerImage
           name: ${IMAGE_REPOSITORY}/${APPLICATION_NAME}:latest
         pushSecret:
-          name: dockerhub
+          name: quay
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      name: ${APPLICATION_NAME}
+    spec:
+      replicas: ${{REPLICA_COUNT}}
+      selector:
+        matchLabels:
+          app: ${APPLICATION_NAME}
+      template:
+        metadata:
+          labels:
+            app: ${APPLICATION_NAME}
+        spec:
+          containers:
+          - name: ${APPLICATION_NAME}
+            image: ${IMAGE_REPOSITORY}/${APPLICATION_NAME}:latest
+            #command: ["/bin/sh"]
+            #args: ["sleep","3600"]
+            volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+          imagePullSecrets:
+            - name: quay
+          volumes:
+          - name: config-volume
+            configMap:
+              name: config
+              items:
+              - key: config.yaml
+                path: config.yaml
 parameters:
   - name: APPLICATION_NAME
     displayName: Application Name
@@ -46,7 +78,7 @@ parameters:
     required: true
   - name: IMAGE_REPOSITORY
     displayName: Image Repository
-    value: kringen
+    value: quay.io/kringen
     required: true
   - name: REPLICA_COUNT
     description: Number of replicas to run
