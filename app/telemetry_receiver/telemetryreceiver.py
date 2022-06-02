@@ -32,13 +32,13 @@ class TelemetryReceiver:
         with open(config_file, "r") as configfile:
             self.config = yaml.safe_load(configfile)
         # Connect to rabbitmq channel
-        self.rabbitmq_server = self.config["rabbitmq"]["server"]
-        self.rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(self.rabbitmq_server))
-        self.rabbitmq_channel = self.rabbitmq_connection.channel()
+        #self.rabbitmq_server = self.config["rabbitmq"]["server"]
+        #self.rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(self.rabbitmq_server))
+        #self.rabbitmq_channel = self.rabbitmq_connection.channel()
         # Loop through the rabbitmq.queues and declare a queue
-        for q in self.config["rabbitmq"]["queues"]:
-            logging.info("Creating queue for {}".format(q))
-            self.rabbitmq_channel.queue_declare(queue=q)
+        #for q in self.config["rabbitmq"]["queues"]:
+        #    logging.info("Creating queue for {}".format(q))
+        #    self.rabbitmq_channel.queue_declare(queue=q)
 
     def receive_reading(self, reading):
         # Reading should be in this format:
@@ -49,9 +49,9 @@ class TelemetryReceiver:
         reading_value["value"] = reading["values"]["Value"]
         logging.info("Queue: {}, Value: {}".format(queue, reading_value))
         # Publish to the queue
-        self.rabbitmq_channel.basic_publish(exchange='',
-                      routing_key=queue,
-                      body=json.dumps(reading_value))
+        #self.rabbitmq_channel.basic_publish(exchange='',
+        #              routing_key=queue,
+        #              body=json.dumps(reading_value))
 
 if __name__ == "__main__":
     tr = TelemetryReceiver()

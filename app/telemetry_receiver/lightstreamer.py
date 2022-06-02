@@ -435,8 +435,8 @@ if __name__ == "__main__":
     # Registering the Subscription
     sub_key = lightstreamer_client.subscribe(subscription)
 
-    wait_for_input()
-
+    # wait_for_input()
+    time.sleep(60)
     # Unsubscribing from Lightstreamer by using the subscription key
     lightstreamer_client.unsubscribe(sub_key)
 
