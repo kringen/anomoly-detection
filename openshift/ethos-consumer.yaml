@@ -1,0 +1,86 @@
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: ${APPLICATION_NAME}
+  iconClass: icon-python
+objects:
+  - kind: BuildConfig
+    apiVersion: v1
+    metadata:
+      name: ${APPLICATION_NAME}
+      annotations:
+        description: Defines how to build the application from a dockerfile
+        template.alpha.openshift.io/wait-for-ready: "true"
+      labels:
+        template: ${APPLICATION_NAME}
+    spec:
+      source:
+        git:
+          uri: "${SOURCE_REPOSITORY_URL}"
+        contextDir: "${CONTEXT_DIRECTORY}"
+      strategy:
+        type: Docker                      
+        dockerStrategy:
+          dockerfilePath: Dockerfile    # Look for Dockerfile in: gitUri/contextDir/dockerfilePath
+      output:
+        to:
+          kind: DockerImage
+          name: ${IMAGE_REPOSITORY}/${APPLICATION_NAME}:latest
+        pushSecret:
+          name: quay
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      name: ${APPLICATION_NAME}
+    spec:
+      replicas: ${{REPLICA_COUNT}}
+      selector:
+        matchLabels:
+          app: ${APPLICATION_NAME}
+      template:
+        metadata:
+          labels:
+            app: ${APPLICATION_NAME}
+        spec:
+          containers:
+          - name: ${APPLICATION_NAME}
+            image: ${IMAGE_REPOSITORY}/${APPLICATION_NAME}:latest
+            #command: ["/bin/sh"]
+            #args: ["sleep","3600"]
+            volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+          imagePullSecrets:
+            - name: quay
+          volumes:
+          - name: config-volume
+            configMap:
+              name: config
+              items:
+              - key: config.yaml
+                path: config.yaml
+parameters:
+  - name: APPLICATION_NAME
+    displayName: Application Name
+    description: The name of the application - used for resource names and labels
+    value: ethos-consumer
+    required: true
+  - name: SOURCE_REPOSITORY_URL
+    displayName: Source Repository URL
+    description: The URL for the application git repository
+    value: https://github.com/kringen/anomoly-detection
+    required: true
+  - name: CONTEXT_DIRECTORY
+    displayName: Context Directory
+    description: Directory containing application in source repository.
+    value: /app/ethos/consumer
+    required: true
+  - name: IMAGE_REPOSITORY
+    displayName: Image Repository
+    value: quay.io/kringen
+    required: true
+  - name: REPLICA_COUNT
+    description: Number of replicas to run
+    value: "1"
+    required: true
