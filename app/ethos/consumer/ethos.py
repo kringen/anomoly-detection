@@ -20,7 +20,7 @@ with open(config_file, "r") as configfile:
 redis_server = config["redis"]["server"]
 r = redis.Redis(host=redis_server, port=6379)
 rabbitmq_server = config["rabbitmq"]["server"]
-rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host=redis_server))
+rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_server))
 
 def generateCallback(q):
     def callback(ch, method, properties, body):
