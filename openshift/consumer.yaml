@@ -64,7 +64,7 @@ parameters:
   - name: APPLICATION_NAME
     displayName: Application Name
     description: The name of the application - used for resource names and labels
-    value: ethos-consumer
+    value: consumer
     required: true
   - name: SOURCE_REPOSITORY_URL
     displayName: Source Repository URL
@@ -74,7 +74,7 @@ parameters:
   - name: CONTEXT_DIRECTORY
     displayName: Context Directory
     description: Directory containing application in source repository.
-    value: /app/ethos/consumer
+    value: /app/consumer
     required: true
   - name: IMAGE_REPOSITORY
     displayName: Image Repository
