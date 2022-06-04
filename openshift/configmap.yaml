@@ -4,6 +4,8 @@ metadata:
   name: config
 data:
   config.yaml: |
+    redis:
+      server: "redis-server"
     rabbitmq:
       server: "rabbitmq-server"
       queues:
