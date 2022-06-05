@@ -9,6 +9,7 @@ import atexit
 import time
 import datetime
 import json
+import traceback
 
 logging.basicConfig(stream=sys.stdout, format='%(asctime)s %(levelname)-7s ' +
             '%(threadName)-15s %(message)s', level=logging.INFO)
