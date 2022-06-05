@@ -14,7 +14,7 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s %(levelname)-7s ' +
 
 class Consumer:
     def __init__(self):
-        self.readings_received = 0
+        self.readings_count = 0
         self.last_received = datetime.datetime.now().isoformat()
 
         # Get configs from file
@@ -54,8 +54,9 @@ class Consumer:
             logging.debug("received:{}, {}".format(q,body))
             self.stream = "readings:{}".format(q)
             self.r.xadd(self.stream, json.loads(body))
+            self.last_received = datetime.datetime.now().isoformat()
             self.readings_count += 1
-            logging.info("Cumulative readings: {}".format(self.readings_count))
+            logging.info("Cumulative readings as of {}: {}".format(self.last_received, self.readings_count))
             # This will push to a stream named readings:ethos:<sensor>
             # To read from this stream:
             # XREAD STREAMS readings:ethos:NODE3000011 0-0
