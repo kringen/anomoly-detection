@@ -42,7 +42,7 @@ class Consumer:
         # Connect to Rabbitmq server
         try:
             rabbitmq_server = self.config["rabbitmq"]["server"]
-            rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_server))
+            self.rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_server))
             logging.info("Connected to {}".format(rabbitmq_server))
         except Exception as e:
             logging.error("Unable to connect to Rabbitmq Server")
@@ -64,7 +64,7 @@ class Consumer:
 
 
     def consume(self):
-        channel = rabbitmq_connection.channel()
+        channel = self.rabbitmq_connection.channel()
 
         try:
             # For each queue in config file, create a consumer and wait for messages
@@ -84,7 +84,7 @@ class Consumer:
     def cleanup(self):
         # Close rabbitmq connection
         logging.info("Closing connection to rabbitmq.")
-        rabbitmq_connection.close()
+        self.rabbitmq_connection.close()
 
 if __name__ == '__main__':
     cons = Consumer()
