@@ -12,4 +12,4 @@ COPY . .
 
 USER 1001
 
-CMD ["python3", "ethos.py"]
+CMD ["python3", "consumer.py"]
