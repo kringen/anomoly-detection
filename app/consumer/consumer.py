@@ -70,7 +70,7 @@ class Consumer:
             # For each queue in config file, create a consumer and wait for messages
             for q in self.config["rabbitmq"]["queues"]:
                 channel.queue_declare(queue=q)
-                callback = generateCallback(q)
+                callback = self.generateCallback(q)
                 channel.basic_consume(queue=q, on_message_callback=callback, auto_ack=True)
                 logging.info("Consuming queue: {}".format(q))
 
